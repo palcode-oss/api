@@ -7,7 +7,10 @@
   "scripts": {
     "start": "node index.js",
     "start-dev": "nodemon index.js",
-    "deploy": "gcloud builds submit --tag gcr.io/palcode-ba70e/palcode-api . && kubectl rollout restart deployment/palcode-api"
+    "deploy": "gcloud -q app deploy"
+  },
+  "engines": {
+    "node": "~14"
   },
   "dependencies": {
     "@google-cloud/storage": "^5.7.0",

@@ -7,6 +7,7 @@ const cors = require("cors");
 
 router.use(cors({
     origin: ['https://palcode.dev', 'http://localhost:3000'],
+    credentials: true,
 }));
 
 router.use(apiGet);
