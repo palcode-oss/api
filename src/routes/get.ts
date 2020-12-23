@@ -1,8 +1,9 @@
-const express = require("express");
+import express from 'express';
+import path from 'path';
+import sanitize from 'sanitize-filename';
+import { getBucket, getLanguageDefaultFile, isValidLanguage } from '../helpers';
+
 const router = express.Router();
-const path = require("path");
-const sanitize = require("sanitize-filename");
-const { getLanguageDefaultFile, isValidLanguage, getBucket } = require("../helpers");
 
 const ignoredPaths = [
     '__pycache__/',
@@ -15,9 +16,9 @@ const ignoredPaths = [
 ];
 
 router.get('/get-file-list', async (req, res) => {
-    const projectId = sanitize(req.query.projectId || '');
-    const schoolId = req.query.schoolId;
-    const language = req.query.language;
+    const projectId = sanitize(req.query.projectId as string || '');
+    const schoolId = req.query.schoolId as string;
+    const language = req.query.language as string;
     if (!projectId || !language || !isValidLanguage(language) || !schoolId) {
         res.sendStatus(400);
         return;
@@ -67,8 +68,8 @@ router.get('/get-file-list', async (req, res) => {
 });
 
 router.get('/get-file', async (req, res) => {
-    const projectId = sanitize(req.query.projectId || '');
-    const fileName = sanitize(req.query.fileName || '');
+    const projectId = sanitize(req.query.projectId as string || '');
+    const fileName = sanitize(req.query.fileName as string || '');
     const schoolId = req.query.schoolId;
 
     if (!projectId || !fileName || !schoolId) {
@@ -94,4 +95,4 @@ router.get('/get-file', async (req, res) => {
     res.send(fileContents);
 });
 
-module.exports = router;
+export default router;

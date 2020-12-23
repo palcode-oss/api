@@ -1,8 +1,9 @@
-const express = require("express");
+import express from 'express';
+import path from 'path';
+import sanitize from 'sanitize-filename';
+import { getBucket } from '../helpers';
+
 const router = express.Router();
-const path = require("path");
-const sanitize = require("sanitize-filename");
-const {getBucket} = require("../helpers");
 
 const prohibitedFiles = [
     '.palcode.lock',
@@ -99,4 +100,4 @@ router.post('/clone', async (req, res) => {
     res.sendStatus(200);
 });
 
-module.exports = router;
+export default router;
