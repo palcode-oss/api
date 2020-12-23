@@ -2,6 +2,8 @@ import express from 'express';
 import path from 'path';
 import sanitize from 'sanitize-filename';
 import { getBucket, getLanguageDefaultFile, isValidLanguage } from '../helpers';
+import { isRequestedAccessAllowed } from '../common/authentication';
+import { ProjectAccessLevel } from '../types';
 
 const router = express.Router();
 
@@ -19,8 +21,14 @@ router.get('/get-file-list', async (req, res) => {
     const projectId = sanitize(req.query.projectId as string || '');
     const schoolId = req.query.schoolId as string;
     const language = req.query.language as string;
-    if (!projectId || !language || !isValidLanguage(language) || !schoolId) {
+    const token = req.query.token as string;
+    if (!projectId || !language || !isValidLanguage(language) || !schoolId || !token) {
         res.sendStatus(400);
+        return;
+    }
+
+    if (!await isRequestedAccessAllowed(token, projectId, ProjectAccessLevel.Read)) {
+        res.sendStatus(403);
         return;
     }
 
@@ -70,10 +78,16 @@ router.get('/get-file-list', async (req, res) => {
 router.get('/get-file', async (req, res) => {
     const projectId = sanitize(req.query.projectId as string || '');
     const fileName = sanitize(req.query.fileName as string || '');
-    const schoolId = req.query.schoolId;
+    const schoolId = req.query.schoolId as string;
+    const token = req.query.token as string;
 
-    if (!projectId || !fileName || !schoolId) {
+    if (!projectId || !fileName || !schoolId || !token) {
         res.sendStatus(400);
+        return;
+    }
+
+    if (!await isRequestedAccessAllowed(token, projectId, ProjectAccessLevel.Read)) {
+        res.sendStatus(403);
         return;
     }
 

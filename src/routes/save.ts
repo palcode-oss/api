@@ -3,6 +3,8 @@ import path from 'path';
 import sanitize from 'sanitize-filename';
 import { getBucket } from '../helpers';
 import { cloneProject } from '../common/clone-project';
+import { isRequestedAccessAllowed } from '../common/authentication';
+import { ProjectAccessLevel } from '../types';
 
 const router = express.Router();
 
@@ -12,10 +14,19 @@ const prohibitedFiles = [
 
 router.post('/save', async (req, res) => {
     const projectId = sanitize(req.body.projectId || '');
-    const files = req.body.files;
-    const schoolId = req.body.schoolId;
-    if (!projectId || !files || !files.length || !schoolId) {
+    const files = req.body.files as {
+        name: string;
+        content: string;
+    }[];
+    const schoolId = req.body.schoolId as string;
+    const token = req.body.token as string;
+    if (!projectId || !files || !files.length || !schoolId || !token) {
         res.sendStatus(400);
+        return;
+    }
+
+    if (!await isRequestedAccessAllowed(token, projectId, ProjectAccessLevel.Write)) {
+        res.sendStatus(403);
         return;
     }
 
@@ -46,10 +57,16 @@ router.post('/save', async (req, res) => {
 router.post('/delete-file', async (req, res) => {
     const projectId = sanitize(req.body.projectId || '');
     const fileName = sanitize(req.body.fileName || '');
-    const schoolId = req.body.schoolId;
+    const schoolId = req.body.schoolId as string;
+    const token = req.body.token as string;
 
-    if (!projectId || !fileName || !schoolId) {
+    if (!projectId || !fileName || !schoolId || !token) {
         res.sendStatus(400);
+        return;
+    }
+
+    if (!await isRequestedAccessAllowed(token, projectId, ProjectAccessLevel.Write)) {
+        res.sendStatus(403);
         return;
     }
 
@@ -68,10 +85,16 @@ router.post('/delete-file', async (req, res) => {
 router.post('/clone', async (req, res) => {
     const projectId = sanitize(req.body.projectId || '');
     const sourceProjectId = sanitize(req.body.sourceProjectId || '');
-    const schoolId = req.body.schoolId;
+    const schoolId = req.body.schoolId as string;
+    const token = req.body.token as string;
 
-    if (!projectId || !sourceProjectId) {
+    if (!projectId || !sourceProjectId || !token) {
         res.sendStatus(400);
+        return;
+    }
+
+    if (!await isRequestedAccessAllowed(token, projectId, ProjectAccessLevel.Write)) {
+        res.sendStatus(403);
         return;
     }
 

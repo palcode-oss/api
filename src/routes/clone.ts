@@ -3,6 +3,7 @@ import express from 'express';
 import sanitize from 'sanitize-filename';
 import { defaults, defaultsDeep } from 'lodash';
 import { cloneProject } from '../common/clone-project';
+import { checkPerms } from '../common/authentication';
 
 const router = express.Router();
 
@@ -19,23 +20,7 @@ router.post('/clone-classroom', async (req, res) => {
         return;
     }
 
-    let uid;
-    try {
-        const decodedToken = await admin.auth().verifyIdToken(token, true);
-        uid = decodedToken.uid;
-    } catch (e) {
-        res.sendStatus(403);
-        return;
-    }
-
-    const userDataResponse = await admin.firestore()
-        .collection('users')
-        .doc(uid)
-        .get();
-
-    const userData = userDataResponse.data();
-
-    if (!userData || userData.perms === 0) {
+    if (!(await checkPerms(token, 1))) {
         res.sendStatus(403);
         return;
     }
