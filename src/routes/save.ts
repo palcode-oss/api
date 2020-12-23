@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import sanitize from 'sanitize-filename';
 import { getBucket } from '../helpers';
+import { cloneProject } from '../common/clone-project';
 
 const router = express.Router();
 
@@ -74,29 +75,7 @@ router.post('/clone', async (req, res) => {
         return;
     }
 
-    const sourceProjectPath = path.join(sourceProjectId);
-    const bucket = getBucket(schoolId);
-    const [files] = await bucket.getFiles({
-        prefix: sourceProjectPath,
-    });
-
-    if (files.length === 0) {
-        res.sendStatus(404);
-        return;
-    }
-
-    for (const file of files) {
-        const strippedFileName = file.name.substring(
-            sourceProjectPath.length,
-        );
-
-        try {
-            await file.copy(
-                path.join(projectId, strippedFileName),
-            );
-        } catch (e) {}
-    }
-
+    await cloneProject(schoolId, sourceProjectId, projectId);
     res.sendStatus(200);
 });
 

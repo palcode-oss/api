@@ -1,17 +1,17 @@
-const {getFirebase, getStorageRoot} = require("../helpers");
-const express = require("express");
-const router = express.Router();
-const sanitize = require("sanitize-filename");
-const fs = require("fs-extra");
-const path = require("path");
-const {defaults, defaultsDeep} = require("lodash");
+import { getFirebaseSingleton } from '../helpers';
+import express from 'express';
+import sanitize from 'sanitize-filename';
+import { defaults, defaultsDeep } from 'lodash';
+import { cloneProject } from '../common/clone-project';
 
-const admin = getFirebase();
-const storageRoot = getStorageRoot();
+const router = express.Router();
+
+const admin = getFirebaseSingleton();
 
 router.post('/clone-classroom', async (req, res) => {
     const classroomId = sanitize(req.body.classroomId);
     const newClassroomName = sanitize(req.body.classroomName);
+    const schoolId = req.body.schoolId as string;
     const token = req.body.token;
 
     if (!classroomId || !newClassroomName || !token) {
@@ -33,7 +33,9 @@ router.post('/clone-classroom', async (req, res) => {
         .doc(uid)
         .get();
 
-    if (!userDataResponse.exists || userDataResponse.data().perms === 0) {
+    const userData = userDataResponse.data();
+
+    if (!userData || userData.perms === 0) {
         res.sendStatus(403);
         return;
     }
@@ -59,23 +61,20 @@ router.post('/clone-classroom', async (req, res) => {
         .collection('classrooms')
         .doc();
 
-    templateTasksResponse.docs.forEach(doc => {
+    for (const doc of templateTasksResponse.docs) {
         const newTask = admin.firestore()
             .collection('tasks')
             .doc();
 
         try {
-            const newProjectPath = path.resolve(storageRoot, newTask.id);
-            const sourceProjectPath = path.resolve(storageRoot, doc.id);
-            fs.mkdirSync(newProjectPath);
-            fs.copySync(sourceProjectPath, newProjectPath);
+            await cloneProject(schoolId, doc.id, newTask.id);
 
             batch.set(newTask, defaultsDeep({
                 classroomId: newClassroom.id,
                 created: admin.firestore.Timestamp.now(),
             }, doc.data()));
         } catch (e) {}
-    });
+    }
 
     // using non-deep defaults for classroom cloning, as members array needs to be cleared
     batch.set(newClassroom, defaults({
@@ -92,4 +91,4 @@ router.post('/clone-classroom', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

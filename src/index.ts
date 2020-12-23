@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import get from './routes/get';
 import save from './routes/save';
+import clone from './routes/clone';
 
 const app = express();
 app.set('trust proxy', true);
@@ -9,6 +10,7 @@ app.use(bodyParser.json());
 
 app.use(get);
 app.use(save);
+app.use(clone);
 
 const server = require("http").createServer(app);
 
