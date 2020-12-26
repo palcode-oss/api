@@ -11,7 +11,7 @@ app.set('trust proxy', true);
 app.use(bodyParser.json());
 
 app.use(cors({
-    origin: ['https://palcode.dev', 'http://localhost:3000'],
+    origin: ['https://palcode.dev', 'https://app.palcode.dev', 'http://localhost:3000'],
     credentials: true,
 }));
 
