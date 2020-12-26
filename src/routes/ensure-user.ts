@@ -62,7 +62,7 @@ router.post('/ensure-user', async (req, res) => {
         .set({
             email: decodedToken.email,
             displayName,
-            username: username,
+            username,
             perms: 0,
             schoolId,
         });
