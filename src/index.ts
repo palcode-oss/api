@@ -4,6 +4,7 @@ import cors from 'cors';
 import get from './routes/get';
 import save from './routes/save';
 import clone from './routes/clone';
+import ensureUser from './routes/ensure-user';
 
 const app = express();
 app.set('trust proxy', true);
@@ -17,6 +18,7 @@ app.use(cors({
 app.use(get);
 app.use(save);
 app.use(clone);
+app.use(ensureUser);
 
 const server = require("http").createServer(app);
 

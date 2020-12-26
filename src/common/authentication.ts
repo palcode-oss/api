@@ -1,35 +1,38 @@
 import { getFirebaseSingleton } from '../helpers';
 import { Perms, Project, ProjectAccessLevel, ProjectStatus, ProjectType, User, WithId } from '../types';
+import type { auth } from 'firebase-admin';
 
 const admin = getFirebaseSingleton();
 
-export const getUserData = async (authToken: string): Promise<WithId<User> | undefined> => {
-    let uid;
+export const getUserData = async (authToken: string): Promise<[
+    WithId<User> | undefined,
+    auth.DecodedIdToken | undefined
+]> => {
+    let decodedToken;
     try {
-        const decodedToken = await admin.auth().verifyIdToken(authToken, true);
-        uid = decodedToken.uid;
+        decodedToken = await admin.auth().verifyIdToken(authToken, true);
     } catch (e) {
-        return;
+        return [undefined, undefined];
     }
 
     const userResponse = await admin.firestore()
         .collection('users')
-        .doc(uid)
+        .doc(decodedToken.uid)
         .get();
 
     const userData = userResponse.data() as User;
     if (!userData) {
-        return;
+        return [undefined, decodedToken];
     }
 
-    return {
-        id: uid,
+    return [{
+        id: decodedToken.uid,
         ...userData,
-    }
+    }, decodedToken];
 }
 
 export const checkPerms = async (authToken: string, perms: Perms) => {
-    const user = await getUserData(authToken);
+    const [user] = await getUserData(authToken);
     return user && user.perms >= perms;
 }
 
@@ -37,7 +40,7 @@ export const checkProjectAccess = async (
     authToken: string,
     projectId: string
 ): Promise<ProjectAccessLevel> => {
-    const user = await getUserData(authToken);
+    const [user] = await getUserData(authToken);
     if (!user) return ProjectAccessLevel.None;
 
     const projectResponse = await admin.firestore()
