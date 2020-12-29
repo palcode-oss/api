@@ -20,12 +20,13 @@ export const getLanguageDefaultFile = (language: string): string => {
         case 'bash': return 'main.sh';
         case 'java': return 'Main.java';
         case 'prolog': return 'main.pl';
+        case 'go': return 'main.go';
         default: return 'main.txt';
     }
 }
 
 export const isValidLanguage = (language: string) => {
-    return ['python', 'nodejs', 'bash', 'java', 'prolog'].includes(language);
+    return ['python', 'nodejs', 'bash', 'java', 'prolog', 'go'].includes(language);
 }
 
 export const getFirebaseSingleton = () => {
