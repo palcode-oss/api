@@ -1,5 +1,6 @@
 import admin from 'firebase-admin';
 import { Storage } from '@google-cloud/storage';
+import { languageData, SupportedLanguage } from 'palcode-types';
 
 let serviceAccount;
 if (process.env.NODE_ENV !== 'production') {
@@ -13,21 +14,13 @@ admin.initializeApp({
 
 const storage = new Storage();
 
-export const getLanguageDefaultFile = (language: string): string => {
-    switch (language) {
-        case 'python': return 'main.py';
-        case 'nodejs': return 'index.js';
-        case 'bash': return 'main.sh';
-        case 'java': return 'Main.java';
-        case 'prolog': return 'main.pl';
-        case 'go': return 'main.go';
-        case 'cpp': return 'main.cpp';
-        default: return 'main.txt';
+export const getLanguageDefaultFile = (languageName: SupportedLanguage): string => {
+    const language = languageData.find(e => e.names.code === languageName);
+    if (!language) {
+        return 'main.txt';
     }
-}
 
-export const isValidLanguage = (language: string) => {
-    return ['python', 'nodejs', 'bash', 'java', 'prolog', 'go', 'cpp'].includes(language);
+    return language.entrypoint;
 }
 
 export const getFirebaseSingleton = () => {

@@ -1,9 +1,10 @@
 import express from 'express';
 import path from 'path';
 import sanitize from 'sanitize-filename';
-import { getBucket, getLanguageDefaultFile, isValidLanguage } from '../helpers';
+import { getBucket, getLanguageDefaultFile } from '../helpers';
 import { isRequestedAccessAllowed } from '../common/authentication';
 import { ProjectAccessLevel } from '../types';
+import { isValidLanguage } from 'palcode-types';
 
 const router = express.Router();
 
@@ -22,7 +23,7 @@ router.get('/get-file-list', async (req, res) => {
     const schoolId = req.query.schoolId as string;
     const language = req.query.language as string;
     const token = req.query.token as string;
-    if (!projectId || !language || !isValidLanguage(language) || !schoolId || !token) {
+    if (!projectId || !language || !isValidLanguage(language, 'code') || !schoolId || !token) {
         res.sendStatus(400);
         return;
     }

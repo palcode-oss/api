@@ -1,3 +1,5 @@
+import { ProjectStatus, ProjectType } from 'palcode-types';
+
 export type WithId<T> = {
     id: string,
 } & T;
@@ -14,18 +16,6 @@ export type Perms = 0 | 1 | 2;
 export interface User {
     perms: Perms;
     schoolId: string;
-}
-
-export enum ProjectType {
-    Template,
-    Submission,
-    Private,
-}
-
-export enum ProjectStatus {
-    Unsubmitted,
-    Submitted,
-    HasFeedback,
 }
 
 export interface Project {

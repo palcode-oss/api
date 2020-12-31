@@ -1144,6 +1144,11 @@ p-try@^2.0.0:
   resolved "https://registry.yarnpkg.com/p-try/-/p-try-2.2.0.tgz#cb2868540e313d61de58fafbe35ce9004d5540e6"
   integrity sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==
 
+palcode-types@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/palcode-types/-/palcode-types-1.0.2.tgz#4fef0b79e7586c1ece60143feef9df8bed489d14"
+  integrity sha512-aNNFgy9D5pK2kmwYwPgE96NjdKt2dHIEwfy3HaHfPnYOoLqkFhCFNKIvxu6hxVdfn5gCArvM7Spvyt78NFN/Kg==
+
 parseurl@~1.3.3:
   version "1.3.3"
   resolved "https://registry.yarnpkg.com/parseurl/-/parseurl-1.3.3.tgz#9da19e7bee8d12dff0513ed5b76957793bc2e8d4"

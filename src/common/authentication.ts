@@ -1,6 +1,7 @@
 import { getFirebaseSingleton } from '../helpers';
-import { Perms, Project, ProjectAccessLevel, ProjectStatus, ProjectType, User, WithId } from '../types';
+import { Perms, Project, ProjectAccessLevel, User, WithId } from '../types';
 import type { auth } from 'firebase-admin';
+import { ProjectStatus, ProjectType } from 'palcode-types';
 
 const admin = getFirebaseSingleton();
 
