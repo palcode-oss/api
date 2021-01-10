@@ -3,6 +3,7 @@ import * as EmailValidator from 'email-validator';
 import psl from 'psl';
 import { getFirebaseSingleton } from '../helpers';
 import {v4 as uuid} from 'uuid';
+import safelyGetSchool from '../common/school';
 
 const router = express.Router();
 
@@ -95,19 +96,14 @@ router.patch("/schools/:schoolId/auth", async (req, res) => {
         return;
     }
 
-    const admin = getFirebaseSingleton();
-    const schoolResponse = await admin.firestore()
-        .collection('schools')
-        .doc(schoolId)
-        .get();
-
-    if (!schoolResponse.exists) {
-        res.sendStatus(404);
+    const [schoolStatus, schoolResponse] = await safelyGetSchool(schoolId, setupToken);
+    if (schoolStatus) {
+        res.sendStatus(schoolStatus);
         return;
     }
 
-    if (schoolResponse.data()?.auth.setupToken !== setupToken) {
-        res.sendStatus(403);
+    if (!schoolResponse) {
+        res.sendStatus(404);
         return;
     }
 

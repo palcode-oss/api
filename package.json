@@ -6,9 +6,9 @@
   "private": true,
   "scripts": {
     "start": "node dist/index.js",
-    "start-dev": "ts-node-dev --respawn src/index.ts",
+    "start-dev": "./embed-secrets.sh && ts-node-dev --respawn src/index.ts",
     "build": "tsc",
-    "deploy": "yarn run --ignore-engines build && gcloud -q app deploy"
+    "deploy": "./embed-secrets.sh && yarn run build && gcloud -q app deploy"
   },
   "engines": {
     "node": "~14"
@@ -24,6 +24,7 @@
     "palcode-types": "1.1.0",
     "psl": "^1.8.0",
     "sanitize-filename": "^1.6.3",
+    "stripe": "^8.130.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
