@@ -5,6 +5,7 @@ import get from './routes/get';
 import save from './routes/save';
 import clone from './routes/clone';
 import ensureUser from './routes/ensure-user';
+import cloudSignup from './routes/cloud-signup';
 
 const app = express();
 app.set('trust proxy', true);
@@ -19,6 +20,7 @@ app.use(get);
 app.use(save);
 app.use(clone);
 app.use(ensureUser);
+app.use(cloudSignup);
 
 const server = require("http").createServer(app);
 
