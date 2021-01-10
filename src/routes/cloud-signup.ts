@@ -80,4 +80,42 @@ router.post("/schools", async (req, res) => {
     });
 });
 
+router.patch("/schools/:schoolId/auth", async (req, res) => {
+    const setupToken = req.body['setupToken'];
+    const authService = req.body['authService'];
+    const tenant = req.body['tenant'];
+    const schoolId = req.params.schoolId;
+
+    if ([
+        setupToken,
+        authService,
+        tenant,
+    ].some(e => !e)) {
+        res.sendStatus(400);
+        return;
+    }
+
+    const admin = getFirebaseSingleton();
+    const schoolResponse = await admin.firestore()
+        .collection('schools')
+        .doc(schoolId)
+        .get();
+
+    if (!schoolResponse.exists) {
+        res.sendStatus(404);
+        return;
+    }
+
+    if (schoolResponse.data()?.auth.setupToken !== setupToken) {
+        res.sendStatus(403);
+        return;
+    }
+
+    await schoolResponse.ref.update({
+        'auth.service': authService,
+        'auth.tenant': tenant,
+    });
+    res.sendStatus(200);
+});
+
 export default router;
