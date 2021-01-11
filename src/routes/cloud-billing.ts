@@ -2,11 +2,49 @@ import express from 'express';
 import * as stripeFactory from 'stripe';
 import { secrets } from '../secrets';
 import safelyGetSchool from '../common/school';
+import { billingPriceIds } from '../common/billing-prices';
+import { getFirebaseSingleton } from '../helpers';
 
 const router = express.Router();
 
 const stripe = new stripeFactory.Stripe(secrets['stripe'], {
     apiVersion: '2020-08-27',
+});
+
+router.get("/plans/:plan/:frequency", async (req, res) => {
+    const plan = req.params.plan;
+    const frequency = req.params.frequency;
+
+    const planObject = billingPriceIds[plan];
+    if (!planObject) {
+        res.sendStatus(404);
+        return;
+    }
+
+    const frequencyObject = planObject[frequency];
+    if (!frequencyObject) {
+        res.sendStatus(404);
+        return;
+    }
+
+    const priceId = frequencyObject[process.env.NODE_ENV === 'production' ? 'live' : 'test'];
+    let price: stripeFactory.Stripe.Price;
+    try {
+        price = await stripe.prices.retrieve(priceId);
+    } catch (e) {
+        res.sendStatus(500);
+        return;
+    }
+
+    if (price.unit_amount == null) {
+        res.sendStatus(500);
+        return;
+    }
+
+    res.status(200).send({
+        id: priceId,
+        amount: (price.unit_amount / 100).toFixed(2),
+    });
 });
 
 router.post('/schools/:schoolId/billing/setup', async (req, res) => {
@@ -15,7 +53,6 @@ router.post('/schools/:schoolId/billing/setup', async (req, res) => {
     const billingEmail = req.body['billingEmail'];
     const billingLine1 = req.body['billingLine1'];
     const billingPostalCode = req.body['billingPostalCode'];
-    const billingCountry = req.body['billingCountry'];
     const schoolId = req.params.schoolId;
 
     if ([
@@ -25,7 +62,6 @@ router.post('/schools/:schoolId/billing/setup', async (req, res) => {
         billingEmail,
         billingLine1,
         billingPostalCode,
-        billingCountry,
     ].some(e => !e)) {
         res.sendStatus(400);
         return;
@@ -45,7 +81,7 @@ router.post('/schools/:schoolId/billing/setup', async (req, res) => {
             address: {
                 line1: billingLine1,
                 postal_code: billingPostalCode,
-                country: billingCountry,
+                country: 'UK',
             },
             metadata: {
                 schoolId,
@@ -61,14 +97,80 @@ router.post('/schools/:schoolId/billing/setup', async (req, res) => {
         setupIntent = await stripe.setupIntents.create({
             usage: 'off_session',
             customer: customer.id,
-            confirm: true,
         });
     } catch (e) {
         res.sendStatus(500);
         return;
     }
 
+    const admin = getFirebaseSingleton();
+    await admin.firestore()
+        .collection('schools')
+        .doc(schoolId)
+        .update({
+            'billing.customerId': customer.id,
+        });
+
     res.status(200).send(setupIntent.client_secret);
+});
+
+router.post('/schools/:schoolId/billing/subscribe', async (req, res) => {
+    const setupToken = req.body['setupToken'];
+    const schoolId = req.params.schoolId;
+    const planId = req.body['planId'];
+
+    if (!setupToken || !planId) {
+        res.sendStatus(400);
+        return;
+    }
+
+    const [schoolStatus, schoolResponse] = await safelyGetSchool(schoolId, setupToken);
+    if (schoolStatus) {
+        res.sendStatus(schoolStatus);
+        return;
+    }
+
+    const schoolCustomerId = schoolResponse?.data()?.billing?.customerId;
+    if (!schoolCustomerId) {
+        res.sendStatus(404);
+        return;
+    }
+
+    let paymentMethods: stripeFactory.Stripe.Response<stripeFactory.Stripe.ApiList<stripeFactory.Stripe.PaymentMethod>>;
+    try {
+        paymentMethods = await stripe.paymentMethods.list({
+            customer: schoolCustomerId,
+            type: 'card',
+        });
+    } catch (e) {
+        res.sendStatus(404);
+        return;
+    }
+
+    const paymentMethodId = paymentMethods.data[0]?.id;
+    if (!paymentMethodId) {
+        res.sendStatus(404);
+        return;
+    }
+
+    try {
+        await stripe.subscriptions.create({
+            customer: schoolCustomerId,
+            items: [{
+                price: planId,
+            }],
+            default_payment_method: paymentMethodId,
+            metadata: {
+                schoolId,
+            }
+        });
+    } catch (e) {
+        res.sendStatus(500);
+        return;
+    }
+
+    res.sendStatus(200);
+    return;
 });
 
 export default router;
