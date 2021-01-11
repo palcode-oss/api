@@ -13,6 +13,7 @@ router.post('/ensure-user', async (req, res) => {
     const admin = getFirebaseSingleton();
 
     const token = req.body.token;
+    const setupToken = req.body.setupToken;
     if (!token) {
         res.status(400).send('No token provided.');
         return;
@@ -48,7 +49,19 @@ router.post('/ensure-user', async (req, res) => {
 
     const schoolId = schoolResponse.docs[0].id;
 
-    let displayName = decodedToken.displayName;
+    let perms = 0;
+    if (setupToken === schoolResponse.docs[0].data().auth?.setupToken) {
+        perms = 2;
+
+        await admin.firestore()
+            .collection('schools')
+            .doc(schoolId)
+            .update({
+                'auth.setupToken': admin.firestore.FieldValue.delete(),
+            });
+    }
+
+    let displayName = decodedToken.displayName || '';
     if (decodedToken.additionalUserInfo?.profile) {
         const profile = decodedToken.additionalUserInfo.profile as MicrosoftProfile;
         if (profile.givenName && profile.surname) {
@@ -63,7 +76,7 @@ router.post('/ensure-user', async (req, res) => {
             email: decodedToken.email,
             displayName,
             username,
-            perms: 0,
+            perms,
             schoolId,
         });
 
