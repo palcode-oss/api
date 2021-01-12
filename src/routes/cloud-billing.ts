@@ -184,7 +184,7 @@ router.post("/webhooks/billing-status", async (req, res) => {
     try {
         event = stripe.webhooks.constructEvent(req.body, sig, secrets['stripe_sig']);
     } catch (e) {
-        res.sendStatus(401);
+        res.status(401).send(e.message);
         return;
     }
 
