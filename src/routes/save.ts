@@ -45,7 +45,6 @@ router.post('/save',  parseJsonBody, async (req, res) => {
                 )
                 .save(fileContent);
         } catch (e) {
-            console.log(e.code, Date.now());
             res.sendStatus(500);
             return;
         }

@@ -8,6 +8,7 @@ import ensureUser from './routes/ensure-user';
 import cloudSignup from './routes/cloud-signup';
 import cloudBilling from './routes/cloud-billing';
 import cloudWebhooks from './routes/cloud-webhooks';
+import examMode from './routes/exam-mode';
 
 const app = express();
 app.set('trust proxy', true);
@@ -20,7 +21,10 @@ app.use(cors({
 app.use(get);
 app.use(save);
 app.use(clone);
+app.use(examMode);
+
 app.use(ensureUser);
+
 app.use(cloudSignup);
 app.use(cloudBilling);
 app.use(cloudWebhooks);
