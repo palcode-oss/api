@@ -17,15 +17,13 @@ app.use(cors({
     credentials: true,
 }));
 
-app.use(cloudWebhooks); // used without JSON parsing for compatibility with Stripe
-
-app.use(bodyParser.json());
 app.use(get);
 app.use(save);
 app.use(clone);
 app.use(ensureUser);
 app.use(cloudSignup);
 app.use(cloudBilling);
+app.use(cloudWebhooks);
 
 const server = require("http").createServer(app);
 

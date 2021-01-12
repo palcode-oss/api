@@ -1,4 +1,4 @@
-import { getFirebaseSingleton } from '../helpers';
+import { getFirebaseSingleton, parseJsonBody } from '../helpers';
 import express from 'express';
 import sanitize from 'sanitize-filename';
 import { defaults, defaultsDeep } from 'lodash';
@@ -9,7 +9,7 @@ const router = express.Router();
 
 const admin = getFirebaseSingleton();
 
-router.post('/clone-classroom', async (req, res) => {
+router.post('/clone-classroom', parseJsonBody, async (req, res) => {
     const classroomId = sanitize(req.body.classroomId);
     const newClassroomName = sanitize(req.body.classroomName);
     const schoolId = req.body.schoolId as string;

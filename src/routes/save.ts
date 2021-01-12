@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import sanitize from 'sanitize-filename';
-import { getBucket } from '../helpers';
+import { getBucket, parseJsonBody } from '../helpers';
 import { cloneProject } from '../common/clone-project';
 import { isRequestedAccessAllowed } from '../common/authentication';
 import { ProjectAccessLevel } from '../types';
@@ -12,7 +12,7 @@ const prohibitedFiles = [
     '.palcode.lock',
 ];
 
-router.post('/save', async (req, res) => {
+router.post('/save',  parseJsonBody, async (req, res) => {
     const projectId = sanitize(req.body.projectId || '');
     const files = req.body.files as {
         name: string;
@@ -54,7 +54,7 @@ router.post('/save', async (req, res) => {
     res.sendStatus(200);
 });
 
-router.post('/delete-file', async (req, res) => {
+router.post('/delete-file', parseJsonBody, async (req, res) => {
     const projectId = sanitize(req.body.projectId || '');
     const fileName = sanitize(req.body.fileName || '');
     const schoolId = req.body.schoolId as string;
@@ -82,7 +82,7 @@ router.post('/delete-file', async (req, res) => {
     }
 });
 
-router.post('/clone', async (req, res) => {
+router.post('/clone', parseJsonBody, async (req, res) => {
     const projectId = sanitize(req.body.projectId || '');
     const sourceProjectId = sanitize(req.body.sourceProjectId || '');
     const schoolId = req.body.schoolId as string;

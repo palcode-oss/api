@@ -5,13 +5,11 @@ import { getFirebaseSingleton, getStripe } from '../helpers';
 import { Stripe } from 'stripe';
 
 const router = express.Router();
-router.use(bodyParser.raw({
-    type: 'application/json',
-}));
-
 const stripe = getStripe();
 
-router.post("/webhooks/billing-status", async (req, res) => {
+router.post("/webhooks/billing-status", bodyParser.raw({
+    type: 'application/json',
+}), async (req, res) => {
     const sig = req.headers['stripe-signature'];
     if (!sig) {
         res.sendStatus(400);

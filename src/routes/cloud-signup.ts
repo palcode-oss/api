@@ -1,13 +1,13 @@
 import express from 'express';
 import * as EmailValidator from 'email-validator';
 import psl from 'psl';
-import { getFirebaseSingleton } from '../helpers';
+import { getFirebaseSingleton, parseJsonBody } from '../helpers';
 import {v4 as uuid} from 'uuid';
 import safelyGetSchool from '../common/school';
 
 const router = express.Router();
 
-router.post("/schools", async (req, res) => {
+router.post("/schools", parseJsonBody, async (req, res) => {
     const fullName = req.body['fullName'];
     const workEmail = req.body['email'];
 
@@ -81,7 +81,7 @@ router.post("/schools", async (req, res) => {
     });
 });
 
-router.patch("/schools/:schoolId/auth", async (req, res) => {
+router.patch("/schools/:schoolId/auth", parseJsonBody, async (req, res) => {
     const setupToken = req.body['setupToken'];
     const authService = req.body['authService'];
     const tenant = req.body['tenant'];

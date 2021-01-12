@@ -3,6 +3,7 @@ import { Storage } from '@google-cloud/storage';
 import { languageData, SupportedLanguage } from 'palcode-types';
 import { Stripe } from 'stripe';
 import { secrets } from './secrets';
+import bodyParser from 'body-parser';
 
 let serviceAccount;
 if (process.env.NODE_ENV !== 'production') {
@@ -39,3 +40,5 @@ export const getStripe = () => {
         apiVersion: '2020-08-27',
     });
 }
+
+export const parseJsonBody = bodyParser.json();

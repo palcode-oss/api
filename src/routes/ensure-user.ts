@@ -1,6 +1,6 @@
 import express from 'express';
 import { getUserData } from '../common/authentication';
-import { getFirebaseSingleton } from '../helpers';
+import { getFirebaseSingleton, parseJsonBody } from '../helpers';
 
 const router = express.Router();
 
@@ -9,7 +9,7 @@ interface MicrosoftProfile {
     surname?: string;
 }
 
-router.post('/ensure-user', async (req, res) => {
+router.post('/ensure-user', parseJsonBody, async (req, res) => {
     const admin = getFirebaseSingleton();
 
     const token = req.body.token;

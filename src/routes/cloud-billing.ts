@@ -2,7 +2,7 @@ import express from 'express';
 import { Stripe } from 'stripe';
 import safelyGetSchool from '../common/school';
 import { billingPriceIds } from '../common/billing-prices';
-import { getFirebaseSingleton, getStripe } from '../helpers';
+import { getFirebaseSingleton, getStripe, parseJsonBody } from '../helpers';
 
 const router = express.Router();
 
@@ -44,7 +44,7 @@ router.get("/plans/:plan/:frequency", async (req, res) => {
     });
 });
 
-router.post('/schools/:schoolId/billing/setup', async (req, res) => {
+router.post('/schools/:schoolId/billing/setup', parseJsonBody, async (req, res) => {
     const setupToken = req.body['setupToken'];
     const billingName = req.body['billingName'];
     const billingEmail = req.body['billingEmail'];
@@ -111,7 +111,7 @@ router.post('/schools/:schoolId/billing/setup', async (req, res) => {
     res.status(200).send(setupIntent.client_secret);
 });
 
-router.post('/schools/:schoolId/billing/subscribe', async (req, res) => {
+router.post('/schools/:schoolId/billing/subscribe', parseJsonBody, async (req, res) => {
     const setupToken = req.body['setupToken'];
     const schoolId = req.params.schoolId;
     const planId = req.body['planId'];
