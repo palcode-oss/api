@@ -2,9 +2,10 @@ import { checkProjectAccess } from '../common/authentication';
 import { ProjectAccessLevel } from '../types';
 import { getFirebaseSingleton } from '../helpers';
 import type { Request } from 'express';
+import { ExamEvent, ExamEventName } from 'palcode-types';
 
 export default async function logExamEvent(
-    event: 'start' | 'breach',
+    event: ExamEventName,
     {
         req,
         metadata,
@@ -27,16 +28,21 @@ export default async function logExamEvent(
     }
 
     const admin = getFirebaseSingleton();
+    const eventObject = {
+        event,
+        createdAt: admin.firestore.Timestamp.now(),
+        ip: req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+    } as ExamEvent;
+
+    if (metadata) {
+        eventObject.metadata = metadata;
+    }
+
     await admin.firestore()
         .collection('tasks')
         .doc(projectId)
-        .collection('exam-events')
-        .add({
-            event,
-            createdAt: admin.firestore.Timestamp.now(),
-            ip: req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress,
-            ...metadata,
-        });
+        .collection('examEvents')
+        .add(eventObject);
 
     return 200;
 }
