@@ -19,15 +19,13 @@ app.use(cors({
 
 app.use(cloudWebhooks); // used without JSON parsing for compatibility with Stripe
 
-const primaryRouter = express.Router();
-primaryRouter.use(bodyParser.json());
-primaryRouter.use(get);
-primaryRouter.use(save);
-primaryRouter.use(clone);
-primaryRouter.use(ensureUser);
-primaryRouter.use(cloudSignup);
-primaryRouter.use(cloudBilling);
-app.use(primaryRouter);
+app.use(bodyParser.json());
+app.use(get);
+app.use(save);
+app.use(clone);
+app.use(ensureUser);
+app.use(cloudSignup);
+app.use(cloudBilling);
 
 const server = require("http").createServer(app);
 
