@@ -7,22 +7,27 @@ import clone from './routes/clone';
 import ensureUser from './routes/ensure-user';
 import cloudSignup from './routes/cloud-signup';
 import cloudBilling from './routes/cloud-billing';
+import cloudWebhooks from './routes/cloud-webhooks';
 
 const app = express();
 app.set('trust proxy', true);
-app.use(bodyParser.json());
 
 app.use(cors({
     origin: ['https://palcode.dev', 'https://app.palcode.dev', 'http://localhost:3000'],
     credentials: true,
 }));
 
-app.use(get);
-app.use(save);
-app.use(clone);
-app.use(ensureUser);
-app.use(cloudSignup);
-app.use(cloudBilling);
+const primaryRouter = express.Router();
+primaryRouter.use(bodyParser.json());
+primaryRouter.use(get);
+primaryRouter.use(save);
+primaryRouter.use(clone);
+primaryRouter.use(ensureUser);
+primaryRouter.use(cloudSignup);
+primaryRouter.use(cloudBilling);
+
+app.use(primaryRouter);
+app.use(cloudWebhooks); // used without JSON parsing for compatibility with Stripe
 
 const server = require("http").createServer(app);
 

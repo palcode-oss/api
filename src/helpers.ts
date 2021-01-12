@@ -1,6 +1,8 @@
 import admin from 'firebase-admin';
 import { Storage } from '@google-cloud/storage';
 import { languageData, SupportedLanguage } from 'palcode-types';
+import { Stripe } from 'stripe';
+import { secrets } from './secrets';
 
 let serviceAccount;
 if (process.env.NODE_ENV !== 'production') {
@@ -30,4 +32,10 @@ export const getFirebaseSingleton = () => {
 export const getBucket = (schoolId: any) => {
     if (!schoolId || typeof schoolId !== 'string') throw new Error("No School ID provided!");
     return storage.bucket('palcode-school-' + schoolId.toLowerCase());
+}
+
+export const getStripe = () => {
+    return new Stripe(secrets['stripe'], {
+        apiVersion: '2020-08-27',
+    });
 }
