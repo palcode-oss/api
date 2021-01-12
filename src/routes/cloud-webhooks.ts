@@ -56,7 +56,7 @@ router.post("/webhooks/billing-status", async (req, res) => {
             }
 
             const CPUs = parseInt(product.metadata.cpus);
-            const RAM = parseInt(product.metadata.RAM);
+            const RAM = parseInt(product.metadata.ram);
 
             const schoolId = subscription.metadata.schoolId;
             if (!schoolId) {
