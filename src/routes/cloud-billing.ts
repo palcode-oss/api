@@ -4,6 +4,7 @@ import { secrets } from '../secrets';
 import safelyGetSchool from '../common/school';
 import { billingPriceIds } from '../common/billing-prices';
 import { getFirebaseSingleton } from '../helpers';
+import bodyParser from 'body-parser';
 
 const router = express.Router();
 
@@ -173,7 +174,9 @@ router.post('/schools/:schoolId/billing/subscribe', async (req, res) => {
     return;
 });
 
-router.post("/webhooks/billing-status", async (req, res) => {
+router.post("/webhooks/billing-status", bodyParser.raw({
+    type: 'application/json',
+}), async (req, res) => {
     const sig = req.headers['stripe-signature'];
     if (!sig) {
         res.sendStatus(400);
