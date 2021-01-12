@@ -81,7 +81,7 @@ router.post('/schools/:schoolId/billing/setup', async (req, res) => {
             address: {
                 line1: billingLine1,
                 postal_code: billingPostalCode,
-                country: 'UK',
+                country: 'GB',
             },
             metadata: {
                 schoolId,
